@@ -3,7 +3,9 @@ package GoLearnContext
 import (
 	"context"
 	"fmt"
+	"runtime"
 	"testing"
+	"time"
 )
 
 func TestContext(t *testing.T) {
@@ -19,6 +21,7 @@ func TestContextWithValue(t *testing.T){
 
 	contextB := context.WithValue(contextA, "b", "B")
 	contextC := context.WithValue(contextA, "c", "C")
+
 
 	contextD := context.WithValue(contextB, "d", "D")
 	contextE := context.WithValue(contextB, "e", "E")
@@ -37,4 +40,87 @@ func TestContextWithValue(t *testing.T){
 	fmt.Println(contextF.Value("b"))
 
 	fmt.Println(contextA.Value("b"))
+}
+
+func CreateCounter(ctx context.Context) chan int{
+	destination := make(chan int)
+
+	go func() {
+		defer close(destination)
+		counter := 1
+		for{
+			select {
+			case <- ctx.Done() :
+				return
+			default:
+				destination <- counter
+				counter++
+			}
+		}
+	}()
+
+	return destination
+}
+
+func TestContextWithCancel(t *testing.T) {
+	fmt.Println("total go ruotine", runtime.NumGoroutine())
+
+	parent := context.Background()
+	ctx, cancel := context.WithCancel(parent)
+	destination := CreateCounter(ctx)
+
+	fmt.Println("total go ruotine", runtime.NumGoroutine())
+
+	for n := range destination {
+		fmt.Println("Counter ", n)
+		if n == 10 {
+			break
+		}
+	}
+
+	cancel()
+
+	time.Sleep(2*time.Second)
+	fmt.Println("total go ruotine", runtime.NumGoroutine())
+
+}
+
+func TestContextWithTimeout(t *testing.T) {
+	fmt.Println("total go ruotine", runtime.NumGoroutine())
+
+	parent := context.Background()
+	ctx, cancel := context.WithTimeout(parent,5*time.Second)
+	defer cancel()
+
+	destination := CreateCounter(ctx)
+
+	fmt.Println("total go ruotine", runtime.NumGoroutine())
+
+	for n := range destination {
+		fmt.Println("Counter ", n)
+	}
+
+	time.Sleep(2*time.Second)
+	fmt.Println("total go ruotine", runtime.NumGoroutine())
+
+}
+
+func TestContextWithDeadline(t *testing.T) {
+	fmt.Println("total go ruotine", runtime.NumGoroutine())
+
+	parent := context.Background()
+	ctx, cancel := context.WithDeadline(parent,time.Now().Add(5*time.Second))
+	defer cancel()
+
+	destination := CreateCounter(ctx)
+
+	fmt.Println("total go ruotine", runtime.NumGoroutine())
+
+	for n := range destination {
+		fmt.Println("Counter ", n)
+	}
+
+	time.Sleep(2*time.Second)
+	fmt.Println("total go ruotine", runtime.NumGoroutine())
+
 }
