@@ -64,13 +64,29 @@ func (m MockEngine) maxSpeed() int{
 }
 
 func TestCar_Speed_WithMock(t *testing.T) {
-	mock := new(MockEngine)
-	car := Car{
-		Speeder: mock,
-	}
-	mock.On("maxSpeed").Return(9)
-	speed := car.Speed()
-	assert.Equal(t, 20, speed)
+	
+	t.Run("just call one time", func(t *testing.T) {
+		mock := new(MockEngine)
+		car := Car{
+			Speeder: mock,
+		}
+		mock.On("maxSpeed").Return(9).Times(1)
+		speed := car.Speed()
+		assert.Equal(t, 20, speed)
+		mock.AssertExpectations(t)
+	})
+	
+	t.Run("call 3 times", func(t *testing.T) {
+		mock := new(MockEngine)
+		car := Car{
+			Speeder: mock,
+		}
+		mock.On("maxSpeed").Return(60).Times(3)
+		speed := car.Speed()
+		assert.Equal(t, 60, speed)
+		mock.AssertExpectations(t)
+	})
+	
 }
 func TestCar_Speed(t *testing.T) {
 	type fields struct {
