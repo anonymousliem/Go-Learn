@@ -22,7 +22,7 @@ func TestOpenConnection(t *testing.T) {
 }
 
 func GetConnection() *sql.DB{
-	db, err := sql.Open("mysql", "root:@tcp(0.tcp.ngrok.io:16385)/gobase?parseTime=true")
+	db, err := sql.Open("mysql", "root:@tcp(2.tcp.ngrok.io:11800)/gobase?parseTime=true")
 	if err != nil {
 		panic(err)
 	}
