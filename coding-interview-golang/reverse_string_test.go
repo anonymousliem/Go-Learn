@@ -29,6 +29,15 @@ func reverseWithRecursive(word string) string{
 	return reverseWithRecursive(word[1:]) + word[0:1]
 }
 
+func reverse(str string) {
+	if len(str) == 1 {
+		fmt.Print(str)
+		return
+	}
+	reverse(str[1:])
+	fmt.Print(str[0:1])
+}
+
 func TestReverseString(t *testing.T) {
 	t.Run("with loop", func(t *testing.T) {
 		assert.Equal(t, "olah", ReverseString("halo"))
@@ -37,4 +46,6 @@ func TestReverseString(t *testing.T) {
 	t.Run("with recursive", func(t *testing.T) {
 		assert.Equal(t, "olah", reverseWithRecursive("halo"))
 	})
+
+
 }
